@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "989389779163",
+    "firebase_url": "https://alarmmanager-example-e5aeb.firebaseio.com",
+    "project_id": "alarmmanager-example-e5aeb",
+    "storage_bucket": "alarmmanager-example-e5aeb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:989389779163:android:cc5dec81ea6ed416",
+        "android_client_info": {
+          "package_name": "com.esrlabs.alarmmanagerexample"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "989389779163-2701k2dfrmr7srt3013tjct8q6taqjfa.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBYZUWeOqmDk3dET8ENkIoBB6gujmAhSE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
