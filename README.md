@@ -1,8 +1,8 @@
-# alarm_manager_example
+## flutter android_alarm_manager example
 
-A new Flutter project.
+simplest example using the new flutter plugin to execute dart code using the android `AlarmManager` implementation
 
-## Getting Started
+see [android_alarm_manager](https://pub.dartlang.org/packages/android_alarm_manager) for the plugin.
 
-For help getting started with Flutter, view our online
-[documentation](https://flutter.io/).
+
+tested with [8b5af14f2](https://github.com/flutter/flutter/tree/8b5af14f2) of the flutter sdk
