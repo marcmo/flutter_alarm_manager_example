@@ -1,19 +1,13 @@
+import 'package:alarm_manager_example/alarms.dart';
+
 import 'package:flutter/material.dart';
-
-import 'dart:async';
-import 'dart:isolate';
-
 import 'package:android_alarm_manager/android_alarm_manager.dart';
-
-final int periodicAlarmID = 0;
-final int oneShotAlarmID = 1;
-final int oneShotID = 2;
 
 void main() async {
   // Start the AlarmManager service.
   await AndroidAlarmManager.initialize();
 
-  printHelloMessage("Hello, main()!");
+  printLocalMessage("Hello, main()!");
   runApp(MyApp());
 }
 
@@ -39,15 +33,21 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-int _periodicCount = 0;
-
 class _MyHomePageState extends State<MyHomePage> {
   bool _startedAlarm = false;
+  bool _startedClosure = false;
 
   void _startAlarms() {
     startAlarms();
     setState(() {
       _startedAlarm = true;
+    });
+  }
+
+  void _startClosure() {
+    startClosure();
+    setState(() {
+      _startedClosure = true;
     });
   }
 
@@ -72,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
               'Alarms are:',
             ),
             Text(
-              _startedAlarm ? 'running' : 'stopped',
+              _startedAlarm || _startedClosure ? 'running' : 'stopped',
               style: Theme.of(context).textTheme.display1,
             ),
             Row(
@@ -88,57 +88,19 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Text('stop'),
                 ),
               ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                RaisedButton(
+                  onPressed: _startedClosure ? null : _startClosure,
+                  child: Text('start closure'),
+                ),
+              ],
             )
           ],
         ),
       ),
     );
   }
-}
-
-class HelloMessage {
-  final DateTime _now;
-  final String _msg;
-  final int _isolate;
-
-  HelloMessage(this._now, this._msg, this._isolate);
-
-  @override
-  String toString() {
-    return "[$_now] $_msg "
-        "isolate=$_isolate ";
-  }
-}
-
-void printHelloMessage(String msg) {
-  print(HelloMessage(
-    DateTime.now(),
-    msg,
-    Isolate.current.hashCode,
-  ));
-}
-
-void periodicCallback() {
-  _periodicCount++;
-  printHelloMessage("$_periodicCount. periodic Alarm!!!");
-}
-
-void oneShotCallback() {
-  printHelloMessage("oneShot Alarm!!!");
-}
-
-Future<Null> stopAlarms() async {
-  print('stop all alarms');
-  await AndroidAlarmManager.cancel(periodicAlarmID);
-  await AndroidAlarmManager.cancel(oneShotAlarmID);
-}
-
-Future<Null> startAlarms() async {
-  print('startAlarms');
-
-  await AndroidAlarmManager.periodic(
-      const Duration(seconds: 5), periodicAlarmID, periodicCallback,
-      wakeup: true);
-  await AndroidAlarmManager.oneShot(
-      const Duration(seconds: 5), oneShotAlarmID, oneShotCallback);
 }
