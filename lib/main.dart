@@ -1,3 +1,6 @@
+import 'dart:isolate';
+import 'dart:ui';
+
 import 'package:alarm_manager_example/alarms.dart';
 
 import 'package:flutter/material.dart';
@@ -7,7 +10,7 @@ void main() async {
   // Start the AlarmManager service.
   await AndroidAlarmManager.initialize();
 
-  printLocalMessage("Hello, main()!");
+  printLocalMessage("AndroidAlarmManager initialized!");
   runApp(MyApp());
 }
 
@@ -19,7 +22,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Alarm Manager Demo Home Page'),
+      home: MyHomePage(title: 'Simple Alarm Manager Demo'),
     );
   }
 }
@@ -35,19 +38,46 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   bool _startedAlarm = false;
-  bool _startedClosure = false;
+  int _periodic = 0;
+  ReceivePort _foregroundPort = ReceivePort();
+
+  @override
+  void initState() {
+    super.initState();
+    initPlatformState();
+  }
+
+  void initPlatformState() {
+    // The IsolateNameServer allows for us to create a mapping between a String
+    // and a SendPort that is managed by the Flutter engine. A SendPort can
+    // then be looked up elsewhere, like a background callback, to establish
+    // communication channels between isolates that were not spawned by one
+    // another.
+    if (!IsolateNameServer.registerPortWithName(
+        _foregroundPort.sendPort, kAlarmManagerExamplePortName)) {
+      throw 'Unable to register port!';
+    }
+    _foregroundPort.listen((dynamic message) {
+      final int periodicCount = message;
+      print('periodicCount was: $periodicCount');
+      setState(() {
+        _periodic = periodicCount;
+      });
+    }, onDone: () {});
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    // Remove the port mapping just in case the UI is shutting down but
+    // background isolate is continuing to run.
+    IsolateNameServer.removePortNameMapping(kAlarmManagerExamplePortName);
+  }
 
   void _startAlarms() {
     startAlarms();
     setState(() {
       _startedAlarm = true;
-    });
-  }
-
-  void _startClosure() {
-    startClosure();
-    setState(() {
-      _startedClosure = true;
     });
   }
 
@@ -72,7 +102,7 @@ class _MyHomePageState extends State<MyHomePage> {
               'Alarms are:',
             ),
             Text(
-              _startedAlarm || _startedClosure ? 'running' : 'stopped',
+              _startedAlarm ? 'running ($_periodic)' : 'stopped ($_periodic)',
               style: Theme.of(context).textTheme.display1,
             ),
             Row(
@@ -89,15 +119,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ],
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                RaisedButton(
-                  onPressed: _startedClosure ? null : _startClosure,
-                  child: Text('start closure'),
-                ),
-              ],
-            )
           ],
         ),
       ),

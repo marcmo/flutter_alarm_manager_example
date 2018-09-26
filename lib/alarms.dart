@@ -1,10 +1,11 @@
 import 'dart:isolate';
+import 'dart:ui';
 import 'package:android_alarm_manager/android_alarm_manager.dart';
 
 final int periodicAlarmID = 0;
 final int oneShotAlarmID = 1;
-final int oneShotClosureID = 2;
 int _periodicCount = 0;
+const String kAlarmManagerExamplePortName = 'simple_alarm_manager_example_port';
 
 void printLocalMessage(String msg) {
   print("[${DateTime.now()}](${Isolate.current.hashCode}) $msg");
@@ -16,6 +17,9 @@ Function oneShotClosure(int x) => () {
 
 void periodicCallback() {
   _periodicCount++;
+  final SendPort mainSendPort =
+      IsolateNameServer.lookupPortByName(kAlarmManagerExamplePortName);
+  mainSendPort?.send(_periodicCount);
   printLocalMessage("$_periodicCount. periodic Alarm!!!");
 }
 
@@ -37,11 +41,4 @@ Future<Null> startAlarms() async {
       wakeup: true);
   await AndroidAlarmManager.oneShot(
       const Duration(seconds: 5), oneShotAlarmID, oneShotCallback);
-}
-
-Future<Null> startClosure() async {
-  final closure = oneShotClosure(42);
-  print('startClosure (type: ${closure.runtimeType.toString()})');
-  await AndroidAlarmManager.oneShot(
-      const Duration(seconds: 5), oneShotClosureID, closure);
 }
